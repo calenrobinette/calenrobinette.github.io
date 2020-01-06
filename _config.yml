@@ -1,9 +1,9 @@
-site: Ultra
-url: https://example.com
-title: Ultra
-description: Ultra - Super fast Jekyll theme, weighs under 2kb
+site: robinette.dev
+url: https://robinette.dev
+title: robinette.dev
+description: A Portfolio Site for Calen Robinette
 twitter:
-  username: yourusername
+  username: himynameiscalen
   card: summary
 
 permalink: pretty
