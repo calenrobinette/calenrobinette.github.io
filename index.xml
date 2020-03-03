@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>First Post</title>
+      <link>https://robinette.dev/posts/first-post/</link>
+      <pubDate>Mon, 02 Mar 2020 22:28:26 -0500</pubDate>
+      
+      <guid>https://robinette.dev/posts/first-post/</guid>
+      <description>Testing, testing. This is a blog post on a site mostly created for sharing class notes and hosting a resume.</description>
+    </item>
+    
+    <item>
       <title>Lesson 2: Transport and Applications Layers</title>
       <link>https://robinette.dev/notes/cn/lesson-2_-transport-and-applications-layers/</link>
       <pubDate>Mon, 02 Mar 2020 20:53:47 -0500</pubDate>

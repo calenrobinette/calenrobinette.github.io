@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Food, Coffee, Code</title>
+    <link>https://robinette.dev/posts/</link>
+    <description>Recent content in Posts on Food, Coffee, Code</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 02 Mar 2020 22:28:26 -0500</lastBuildDate>
+    
+	<atom:link href="https://robinette.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>First Post</title>
+      <link>https://robinette.dev/posts/first-post/</link>
+      <pubDate>Mon, 02 Mar 2020 22:28:26 -0500</pubDate>
+      
+      <guid>https://robinette.dev/posts/first-post/</guid>
+      <description>Testing, testing. This is a blog post on a site mostly created for sharing class notes and hosting a resume.</description>
+    </item>
+    
+  </channel>
+</rss>

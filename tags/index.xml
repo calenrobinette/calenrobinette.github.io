@@ -6,9 +6,28 @@
     <description>Recent content in Tags on Food, Coffee, Code</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Mon, 02 Mar 2020 22:28:26 -0500</lastBuildDate>
     
 	<atom:link href="https://robinette.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>blog</title>
+      <link>https://robinette.dev/tags/blog/</link>
+      <pubDate>Mon, 02 Mar 2020 22:28:26 -0500</pubDate>
+      
+      <guid>https://robinette.dev/tags/blog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>story</title>
+      <link>https://robinette.dev/tags/story/</link>
+      <pubDate>Mon, 02 Mar 2020 22:28:26 -0500</pubDate>
+      
+      <guid>https://robinette.dev/tags/story/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>
