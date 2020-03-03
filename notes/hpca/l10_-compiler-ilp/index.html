@@ -34,9 +34,7 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
 
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
-
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="L10: Compiler ILP"/>
 <meta name="twitter:description" content="Compiler ILP Compiler can help avoid limitied ILP because of dependence chains, as well as independent instructions that are far apart because the CPU can only see a &ldquo;limited window&rdquo; of instructions.
 Tree Height Reduction Instead of creating cascading dependencies, can group instructions in more efficient ways:
@@ -50,7 +48,6 @@ R8 = R2 &#43; R3 &#43; R4 &#43; R5 ADD R8,R2,R3 ADD R8,R8,R4 ADD R8,R8,R5 Instea
 ADD R8,R2,R3 ADD R7,R4,R5 ADD R8,R7,R8 This uses associativity, which not instructions have as a property" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://robinette.dev/notes/hpca/l10_-compiler-ilp/" />
-<meta property="og:image" content="https://robinette.dev/tn.png"/>
 <meta property="article:published_time" content="2020-03-02T20:09:47-05:00" />
 <meta property="article:modified_time" content="2020-03-02T20:09:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
 

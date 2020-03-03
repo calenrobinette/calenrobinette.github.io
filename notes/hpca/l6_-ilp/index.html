@@ -34,9 +34,7 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
 
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
-
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="L6: ILP"/>
 <meta name="twitter:description" content="Instruction Level Parallelism (ILP) ILP is the theoretical instructions per cycle (IPC) in the best case scenario disregarding almost all limitations.
 What happens when we put all instructions in one cycle? We get close to 0 CPI which is good. But any decode/read cycle won&rsquo;t be accessing the correct value if it needed a previous instruction to finish before it. Forwarding only works to send ahead by one cycle (before that cycles operation), so it also doesn&rsquo;t solve the problem where we need results multiple stages earlier in the pipeline."/>
@@ -46,7 +44,6 @@ What happens when we put all instructions in one cycle? We get close to 0 CPI wh
 What happens when we put all instructions in one cycle? We get close to 0 CPI which is good. But any decode/read cycle won&rsquo;t be accessing the correct value if it needed a previous instruction to finish before it. Forwarding only works to send ahead by one cycle (before that cycles operation), so it also doesn&rsquo;t solve the problem where we need results multiple stages earlier in the pipeline." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://robinette.dev/notes/hpca/l6_-ilp/" />
-<meta property="og:image" content="https://robinette.dev/tn.png"/>
 <meta property="article:published_time" content="2020-03-02T20:05:47-05:00" />
 <meta property="article:modified_time" content="2020-03-02T20:05:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
 
