@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L1: Introduction, Metrics, and Evaluation - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L1: Introduction, Metrics, and Evaluation"/>
+<meta name="twitter:description" content="Introduction, Metrics, and Evaluation What is Computer Architecture Design a computer that is well designed for it&rsquo;s purpose (e.g. the difference between a laptop, desktop, smartphone, server, etc). Laptop and smartphone would be focused on battery life, desktop on power, etc. We need computer architecture to improve performace (speed, battery life, size, weight) and abilities (3D graphics, security, debugging support).
+Computer Architecture is the translation of hardware improvements into better performing and more capable software."/>
+
+<meta property="og:title" content="L1: Introduction, Metrics, and Evaluation" />
+<meta property="og:description" content="Introduction, Metrics, and Evaluation What is Computer Architecture Design a computer that is well designed for it&rsquo;s purpose (e.g. the difference between a laptop, desktop, smartphone, server, etc). Laptop and smartphone would be focused on battery life, desktop on power, etc. We need computer architecture to improve performace (speed, battery life, size, weight) and abilities (3D graphics, security, debugging support).
+Computer Architecture is the translation of hardware improvements into better performing and more capable software." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l1_-introduction-metrics-and-evaluation/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:00:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:00:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L1: Introduction, Metrics, and Evaluation
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L1: Introduction, Metrics, and Evaluation</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="introduction-metrics-and-evaluation">Introduction, Metrics, and Evaluation</h1>
+<h2 id="what-is-computer-architecture">What is Computer Architecture</h2>
+<p>Design a computer that is well designed for it&rsquo;s purpose (e.g. the difference between a laptop, desktop, smartphone, server, etc). Laptop and smartphone would be focused on battery life, desktop on power, etc. We need computer architecture to improve performace (speed, battery life, size, weight) and abilities (3D graphics, security, debugging support).</p>
+<p>Computer Architecture is the translation of hardware improvements into better performing and more capable software.</p>
+<p>Must account for future technology and trends or else risk creating obsolete architecture.</p>
+<ul>
+<li>Moore&rsquo;s law predicts that there are 2x transistors/area every 18-24 months.
+<strong>the goal of computer architecture follows:</strong></li>
+<li>This means processor speed can double at that pace and serves as the metric to meet.</li>
+<li>Power use/operation should half.</li>
+<li>Memory capacity should double</li>
+</ul>
+<p>There is a gap between processor performance and latency. Memory latency only goes up 1.1x every two years. This leads to a &ldquo;memory wall.&rdquo; Caches are the workaround for this. They allow for mitigation of the latency problem by drastically reducing the number of times the processor needs to pull from/store to memory (RAM).</p>
+<p>There are tradeoffs to be weighed to obtain the improvements desired for the desired design. One system best utilizes 2x processing speed while cost and power consumption stay constant. Another might want a more moderate speed improvement while cost and power req are cut in half.</p>
+<hr>
+<h2 id="power-consumption">Power Consumption</h2>
+<p><strong>Dynamic Power</strong></p>
+<p><code>P = 1/2 C * V^2 * f * a</code>
+C is capacitance (chip area)
+V is power supply voltage
+f is frequency (chip Hz number)
+a is activity factor (percent of transistors active in any clock cycle)</p>
+<p>see the tradeoffs above for how the power consumption is a tradeoff game to keep power consumption the same/lower</p>
+<p><strong>Static Power</strong></p>
+<p>The lower the voltage the greater the leakage (exponentially). But the higher the voltage, the higher the dynamic power. There is a sweet spot in the middle where power consumption is lowest.</p>
+<hr>
+<h2 id="fabrication-cost">Fabrication Cost</h2>
+<p>Chips are cut up 12&rdquo; wafers that have gone through a costly production. There is a production yield which is the percentage of chips obtained out of a maximum potential. This yield is negatively affected by defects which take a static number away from the total number of chips produced. This greatly affects larger chips. In accordance to Moore&rsquo;s law we either get smaller chips for the same price or more speed for same price.</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

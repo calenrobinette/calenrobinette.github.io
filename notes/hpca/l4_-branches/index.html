@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L4: Branches - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L4: Branches"/>
+<meta name="twitter:description" content="Branches Branch in a pipeline example:
+BEQ R1,R2,Label means that if R1 and R2 are equal PC &ldquo;jumps&rdquo; to where ever label is. So:
+R1 != R2 -&gt; PC&#43;&#43; R1 == R2 -&gt; PC&#43;&#43; &#43; offset to get to Label
+When the latter happens all other instructions in the pipeline behind the branch are now wasted cycles and the new useful instructions need to start being fetched.
+Branch Prediction Requirements BPred must correctly guess:"/>
+
+<meta property="og:title" content="L4: Branches" />
+<meta property="og:description" content="Branches Branch in a pipeline example:
+BEQ R1,R2,Label means that if R1 and R2 are equal PC &ldquo;jumps&rdquo; to where ever label is. So:
+R1 != R2 -&gt; PC&#43;&#43; R1 == R2 -&gt; PC&#43;&#43; &#43; offset to get to Label
+When the latter happens all other instructions in the pipeline behind the branch are now wasted cycles and the new useful instructions need to start being fetched.
+Branch Prediction Requirements BPred must correctly guess:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l4_-branches/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:03:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:03:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L4: Branches
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L4: Branches</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="branches">Branches</h1>
+<h2 id="branch-in-a-pipeline">Branch in a pipeline</h2>
+<p>example:</p>
+<p><code>BEQ R1,R2,Label</code> means that if R1 and R2 are equal PC &ldquo;jumps&rdquo; to where ever label is. So:</p>
+<p>R1 != R2 -&gt; PC++
+R1 == R2 -&gt; PC++ + offset to get to Label</p>
+<p>When the latter happens all other instructions in the pipeline behind the branch are now wasted cycles and the new useful instructions need to start being fetched.</p>
+<h2 id="branch-prediction-requirements">Branch Prediction Requirements</h2>
+<p>BPred must correctly guess:</p>
+<ul>
+<li>Is this a branch?         } &ndash;&gt; Is this a taken branch?</li>
+<li>Is it taken?              }</li>
+<li>If it&rsquo;s taken what is the target PC?</li>
+</ul>
+<h2 id="branch-prediction-accuracy">Branch Prediction Accuracy</h2>
+<p>CPI = cycles per instruction</p>
+<p>CPI = 1 + ^Mispreds^/~inst~ * ^penalty^/~mispred~</p>
+<p>The above can be summarized as the base 1 CPI plus how often we mispredict times the number of cycles wasted when we mispredict (Pipeline architecture)</p>
+<p>For a BPred with 50% accuracy for branches, 100% accuracy for all other instructions, and 20% of all inst are branches:</p>
+<p>With 3rd stage branch resolution
+<code>CPI = 1 + 0.5 * 0.2 * 2 = 1.2</code></p>
+<p>With 10th stage branch resolution
+<code>CPI = 1 + 0.5 * 0.2 * 9 = 1.9</code></p>
+<p>When the BPred accuracy is increased to 90%</p>
+<p>3rd stage
+<code>CPI = 1 + 0.1 * 0.2 * 2 = 1.04</code></p>
+<p>10th stage
+<code>CPI = 1 + 0.1 * 0.2 * 9 = 1.18</code></p>
+<p>Branch prediction is very important!</p>
+<p>Speedup for 3rd stage is <code>1.2/1.04 = 1.15</code> whereas 10th stage is <code>1.9/1.18 = 1.61</code></p>
+<h3 id="note-from-quiz">Note from quiz</h3>
+<p><code>ADD</code> takes 2 cycles to load and then decode, not 1</p>
+<hr>
+<p>It is always better to predict than to not predict and have every instruction take a minimum of 2 cycles.</p>
+<h2 id="predict-not-taken">Predict Not-Taken</h2>
+<p>For the 80% of non-branch instructions it is 100% accurate
+For the remaining 20% that are branch instructions if we estimate that 60% are taken that means a total of 12% of instructions are taken branches and incur wasted cycles. Thus there is 88% accuracy.</p>
+<p><code>CPI = 1 + 0.12 * penalty</code></p>
+<h2 id="how-do-we-make-better-predictons">How do we make better predictons</h2>
+<p>We need to find ways to identify if an instruction is a branch, whether or not that branch is taken, and what the offset is to add to the PC to get to the jump the branch wants to take.</p>
+<p>Branches tend to act the same historically, so we can use past branch behaviors to inform our branch predictor.</p>
+<h2 id="btb---branch-target-buffer">BTB - Branch Target Buffer</h2>
+<p>Index PC for branches into a table (BTB) with the PC the branch jumps to associated to it. If the branch at that PC goes through the pipeline and jumps to a different PC, the table is updated.</p>
+<p>The BTB needs to be small to keep fetching down to a single cycle. If we indexed every PC in a program on a 64 bit system, it would be far too large.</p>
+<p>In order to keep the BTB small it is reserved for instructions likely to be computed (as in a loop). Additionally, only the 10 least significant bits of the current PC are used as the indexing entry. This works because the PCs will be relatively close due to only storing instructions &ldquo;close-by&rdquo;</p>
+<h2 id="direction-prediction">Direction Prediction</h2>
+<p>Similar to the BTB the Branch History Table (BHT) but just contains a single bit. 0 if not a taken branch (PC++) or 1 if it&rsquo;s a taken branch (use BTB). If the BHT is wrong, it is updated. This allows the BTB to only be reserved for taken branches thus reducing its size.</p>
+<p>1-bit predictors are good for always taken or always not taken. They&rsquo;re pretty good for 90% T/NT. Anything other than that they&rsquo;re bad.</p>
+<h3 id="2-bit-predictor-2bp-2bc-2-bit-counter">2-bit predictor (2BP, 2BC (2-bit counter))</h3>
+<p>More signifigant bit is the prediction bit (0 not taken, 1 taken), least signifigant bit is the hysteresis or conviction bit. 00 is Strong Not-Taken, 01 is Weak Not-Taken, etc. If the branch ends up being not taken the number is decremented if possible and incremented if the branch was taken.</p>
+<p>The initialization state can completely mess up the prediction accuracy of certain patters. For example if the predictor is init as 00 and the pattern is T N T N it will be 50% accurate. There are other similar situations, but it generally isn&rsquo;t worth worrying about except for specific situations.</p>
+<p>3BP and 4BP have much higher costs without seeing much more accuracy. Only situationally useful, doesn&rsquo;t match usual cases in actual programs.</p>
+<h2 id="history-based-predictors">History-based predictors</h2>
+<p>This allows for pattern recognition by setting a 2BP for each of the historical situations. For a 1-bit history with 2BC we have:</p>
+<table>
+<thead>
+<tr>
+<th>1 bit for the previous branch</th>
+<th>BC for 0 history</th>
+<th>BC for 1 history</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Taken or Not Taken</td>
+<td>SN, WN, WT, ST</td>
+<td>SN, WN, WT, ST</td>
+</tr>
+</tbody>
+</table>
+<p>The above is useful for T, N, T, N but not for something like N, N, T, N, N, T. In order to recognize longer patterns, more history bits are necessary (specifically a 2 bit history predictor for the mentioned pattern). N-bit history predictors can be used for all patterns of length &lt;= N + 1. For N-bit history predictors the costs increase rapidly.</p>
+<p><code>Mem req = N + 2^N * 2</code> and this is per entry (each branch). The <code>2^N</code> is the number of 2-bit counters needed for N-bit history.</p>
+<p>With a pattern of length N+1 there can only be N+1 histories. Example: T T N N has T T N N, T N N T, N N T T, and N T T N. However, this requires eight 2-bit counters!</p>
+<h2 id="history-with-shared-counters">History with Shared Counters</h2>
+<p>In order to reduce space we can share the counters. N-bit history requires 2^N counters per entry, but only ~N counters are actually used. The solution is to use multiple entries (branches) per 2BC, this <strong>can</strong> lead to memory conflicts, but rarely does if there are enough counters.</p>
+<p>How it works:</p>
+<ul>
+<li>Take some number of signifigant bits from the PC for each branch instruction and use it as an index for <strong>Pattern History Table</strong> (PHT)</li>
+<li>Store N bits of history (no bit counters, just N N T T)</li>
+<li>Take the history from the table and combine it with the PC (with an XOR usually) and use that to index for <strong>Branch History Table</strong> (BHT) who&rsquo;s entries are single 2-bit counters.</li>
+<li>The BHT 2BC tells us if the branch should be taken or not taken.</li>
+</ul>
+<p>The idea is to store a single 2BC per history + branch combination, which is a lot less than <code>2^N</code>. However, it is possible for multiple PC x PHT combinations to map to the same 2BC in the BHT. The memory requirements shrink to: <code>2^PC-bitsused * N-history + 2^N-history * 2</code> This is much less than before because the <code>2^PC-bitsused * N-history</code> replaces the total number of branches.</p>
+<p>In this system, simple patterns (TTTT, NNNN, NTNT) require very few 2BCs (1, 1, and 2 respectively). Leaving more room for longer non-repeating patterns that require many 2BCs.</p>
+<p>This is known as <strong>PShare</strong>. Where each branch <em>should</em> have it&rsquo;s own <strong>P</strong>rivate history in the Pattern History Table which combined with the branches program counter maps to the Branch History Table of <strong>Share</strong>d counters. PShare does well when the branches previous behavior is predictive of how it will act in the future (NTNT loops, 8-iteration loops).</p>
+<p>Another type of history predictor we can use is <strong>GShare</strong> which uses a single <strong>G</strong>lobal history with it&rsquo;s own BHT of <strong>Share</strong>d counters. Every branch decision effects the single global history entry. This is good for correlated branches. This happens surprisingly often. Think of using <code>if (var == condition)</code> and <code>if (!var == condition)</code>. The history for the first if statement can be used to correctly predict the results of the second if statement accurately.</p>
+<p>Modern processors use both GShare and PShare.</p>
+<h2 id="tournament-predictor">Tournament Predictor</h2>
+<p>Using a <strong>Meta-Predictor</strong> table of 2BCs we store which predictor (GShare or PShare) should be used for each branch (similar to accessing the PHT and BHT, we use the PC to index into the meta-predictor). Each predictor is trained on every branch result. The meta-predictor is only trained (incremented up or down) if one predictor is correct and the other isn&rsquo;t in which case it becomes biased towards the correct predictor.</p>
+<h2 id="heirarchical-predictors">Heirarchical Predictors</h2>
+<p>Tournament: 2 good predictors</p>
+<p>Hierarchical: 1 good, 1 ok predictor</p>
+<p>This is done to reduct maintenance costs by mostly using the ok predictor with low memory usage, and only using the good predictor on more complicated branches. This means that the okpred is updated every decision and the goodpred is only updated if the okpred didn&rsquo;t work.</p>
+<p>Example:</p>
+<p>Pentium M uses a 2BC predictor, Local History, and Global History</p>
+<p>Steps for a branch</p>
+<ol>
+<li>Checks global tag array to see if branch is predicted by global history</li>
+<li>If yes, uses GShare, if no checks local tag array to see if branch is predicted by local history</li>
+<li>If yes, uses PShare, if no uses 2BC</li>
+<li>Whatever predictor the branch <strong>is already stored in</strong> gets updated, if 2BC was used but was wrong and the branch isn&rsquo;t in the local predictor, we add the branch to the local predictor to make sure it&rsquo;s used next time. Same goes from local -&gt; global (if local mispredicts and branch isn&rsquo;t in global -&gt; branch added to global so it&rsquo;s used next time)</li>
+</ol>
+<h2 id="return-address-stack-ras">Return Address Stack (RAS)</h2>
+<p>Most branches have static target adresses they jump to and can be accurately predicted using a BTB. However, function returns (where the PC goes after a function is completed) are harder to predict where they&rsquo;re supposed to goto (They are always taken however). This is because functions are <em>usually</em> created to be called multiple times in a program.</p>
+<p>RAS is a predictor for function returns. When a function is called the return address (function address + 4) is added to a stack. When the function return&rsquo;s that address is popped from the stack and used. If the RAS is full, the PC is stored by wrapping around. This allows for the x most recently called functions to have an accurate return address, which is usefull for nested functions that call the inner functions multiple times.</p>
+<pre><code>billy() {
+    bob() {
+        steve() {
+            // code
+        }
+        
+        // more code
+        
+        steve() {
+            // even more
+        }
+    }
+}
+</code></pre><p>There are 2 methods to tell if an inst is a function return: predictor or <strong>predecoding</strong>. Predictor (just a like a branch predictor) is very accurate and not very memory intensive. Just need a single bit predictor. Predecoding TOO TIRED FINISH TOMORROW</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

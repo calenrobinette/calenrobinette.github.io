@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L7: Instruction Scheduling - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L7: Instruction Scheduling"/>
+<meta name="twitter:description" content="Instruction Scheduling How to execute real world programs faster, even with data dependencies. Tomasulo&rsquo;s algorithm was and still is one of the most efficient ways to take the theory of ILP and physically recreate it in hardware.
+Improving IPC Using out-of-order processing to obtain &gt;1 IPC
+ How to handle control dependencies =&gt; highly accurate branch prediction False data dependencies =&gt; register renaming (RAT) True data dependencies =&gt; out-of-order execution Structural dependencies =&gt; investing in better hardware  We will analyze how to actually impliment register renaming and out-of-order execution"/>
+
+<meta property="og:title" content="L7: Instruction Scheduling" />
+<meta property="og:description" content="Instruction Scheduling How to execute real world programs faster, even with data dependencies. Tomasulo&rsquo;s algorithm was and still is one of the most efficient ways to take the theory of ILP and physically recreate it in hardware.
+Improving IPC Using out-of-order processing to obtain &gt;1 IPC
+ How to handle control dependencies =&gt; highly accurate branch prediction False data dependencies =&gt; register renaming (RAT) True data dependencies =&gt; out-of-order execution Structural dependencies =&gt; investing in better hardware  We will analyze how to actually impliment register renaming and out-of-order execution" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l7_-instruction-scheduling/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:06:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:06:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L7: Instruction Scheduling
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L7: Instruction Scheduling</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="instruction-scheduling">Instruction Scheduling</h1>
+<p>How to execute real world programs faster, even with data dependencies. Tomasulo&rsquo;s algorithm was and still is one of the most efficient ways to take the theory of ILP and physically recreate it in hardware.</p>
+<h2 id="improving-ipc">Improving IPC</h2>
+<p>Using out-of-order processing to obtain &gt;1 IPC</p>
+<ul>
+<li>How to handle control dependencies =&gt; highly accurate branch prediction</li>
+<li>False data dependencies =&gt; register renaming (RAT)</li>
+<li>True data dependencies =&gt; out-of-order execution</li>
+<li>Structural dependencies =&gt; investing in better hardware</li>
+</ul>
+<p>We will analyze how to actually impliment register renaming and out-of-order execution</p>
+<h2 id="tomasulos-algorithm">Tomasulo&rsquo;s Algorithm</h2>
+<p>Goals:</p>
+<ol>
+<li>Determine which instructions have inputs ready</li>
+<li>Register renaming</li>
+</ol>
+<p>Originally it was used for floating point instructions, now it&rsquo;s used for everything.</p>
+<p>Parts:</p>
+<p>Instruction Queue:
+Instructions are fetched and put into a queue. FIFO, so they are in instruction order which allows renaming to work appropriately.</p>
+<p>Reservation Station:
+Instructions are <strong>issued</strong> from the queue to the reservation stations. Usually these have a limiting purpose (ADD/SUB, MUL/DIV). It is in this step that the renaming via the RAT happens, so that instructions can wait for results to be ready if they have true dependencies.</p>
+<p>Registers:
+When an instruction is put in the reservation station, if the values are ready, they are placed in the instruction in the reservation station.</p>
+<p>Execution Unit:
+Adder, Multiplier, etc. Instructions are <strong>dispatched</strong> from the associated reservation station. Computes the instruction then <strong>broadcasts</strong> via a BUS the result to the register file, the reservation stations and the RAT. This allows instructions that are waiting for their values to know that they are free to execute.</p>
+<p>If the instruction is a load or store:</p>
+<ol>
+<li>Goes to the address generation unit to compute the address</li>
+<li>Insert into the load buffer or store buffer</li>
+<li>Queued up to go into memory</li>
+<li>When value comes back from memory, it is also broadcast on the bus.</li>
+<li>Also the storebuffer is the recipiant of the broadcasts so that if it is true dependent it can get it&rsquo;s  values when they become available.</li>
+</ol>
+<h2 id="issue">Issue</h2>
+<ul>
+<li>Take the next instruction (<strong>in program order</strong>) from the instruction queue.</li>
+<li>Determine where the inputs for the instruction come from (are they already in the register file or will they come from an instruction in one of the registration stations)</li>
+<li>Get a free reservation station (This must be of the correct kind and also have a free slot)</li>
+<li>Put instruction into the reservation station</li>
+<li>Update the RAT for the result value with the reservation station address</li>
+</ul>
+<h2 id="dispatch">Dispatch</h2>
+<ul>
+<li><strong>Latch</strong> produced broadcast results to insts waiting for specific RS result</li>
+<li>Decide which inst is ready to execute (has all values, oldest first, longest executing first e.g. MUL/DIV)</li>
+</ul>
+<h2 id="broadcast">Broadcast</h2>
+<ul>
+<li>Put tag (RS#) &amp; result on Bus</li>
+<li>Write to Reg (use RAT to convert RS# -&gt; F#)</li>
+<li>Update (clear) RAT</li>
+<li>Free RS</li>
+</ul>
+<p>If one bus, the slower unit result is broadcast in priority. If stale result is broadcast (aka RAT doesn&rsquo;t contain RS# for result), it still latches to RS, but otherwise does nothing.</p>
+<p>Per cycle:</p>
+<ul>
+<li>Issue</li>
+<li>Capture (latch)</li>
+<li>Dispatch</li>
+<li>Write Result</li>
+</ul>
+<p>Same cycle:
+Issue -&gt; Dispatch? No
+Capture -&gt; Dispatch? No
+Update RAT for Issue &amp; Write Result? Yes but Issue updates RAT last</p>
+<h2 id="load-and-store">Load and Store</h2>
+<p>In Tomasulo&rsquo;s done in order to avoid dependency problems</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L6: ILP - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L6: ILP"/>
+<meta name="twitter:description" content="Instruction Level Parallelism (ILP) ILP is the theoretical instructions per cycle (IPC) in the best case scenario disregarding almost all limitations.
+What happens when we put all instructions in one cycle? We get close to 0 CPI which is good. But any decode/read cycle won&rsquo;t be accessing the correct value if it needed a previous instruction to finish before it. Forwarding only works to send ahead by one cycle (before that cycles operation), so it also doesn&rsquo;t solve the problem where we need results multiple stages earlier in the pipeline."/>
+
+<meta property="og:title" content="L6: ILP" />
+<meta property="og:description" content="Instruction Level Parallelism (ILP) ILP is the theoretical instructions per cycle (IPC) in the best case scenario disregarding almost all limitations.
+What happens when we put all instructions in one cycle? We get close to 0 CPI which is good. But any decode/read cycle won&rsquo;t be accessing the correct value if it needed a previous instruction to finish before it. Forwarding only works to send ahead by one cycle (before that cycles operation), so it also doesn&rsquo;t solve the problem where we need results multiple stages earlier in the pipeline." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l6_-ilp/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:05:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:05:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L6: ILP
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L6: ILP</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="instruction-level-parallelism-ilp">Instruction Level Parallelism (ILP)</h1>
+<p>ILP is the theoretical instructions per cycle (IPC) in the best case scenario disregarding almost all limitations.</p>
+<p>What happens when we put all instructions in one cycle? We get close to 0 CPI which is good. But any decode/read cycle won&rsquo;t be accessing the correct value if it needed a previous instruction to finish before it. Forwarding only works to send ahead by one cycle (before that cycles operation), so it also doesn&rsquo;t solve the problem where we need results multiple stages earlier in the pipeline. Thus the dependent instruction <strong>stall</strong>s until the needed value can be forwarded.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p>RAW (Data) dependencies are what effect ILP. When an instruction is relying on the result of a previous instruction it must wait one cycle before the result can be fowarded to it and it can execute. If the instruction isn&rsquo;t data dependent it can execute on the first instruction.</p>
+<h2 id="false-depenencies">False Depenencies</h2>
+<p>There are other dependencies, such as WAW (anti) which could cause the wrong result to end up in a register because an earlier instruction executes later. However, these <strong>false dependencies</strong> can be removed by register renaming. This separates the concept of <strong>architectural registers</strong> which are what the compiler writes/uses and <strong>physical registers</strong> which are <em>all</em> the possible location values can be stored. As the processor executes the code at the assembly level it does register renaming to obtain the correct values per the segment of code it&rsquo;s executing (based only on true dependencies). This is done via a <strong>Register Allocation Table (RAT)</strong>.</p>
+<h2 id="register-allocation-table-rat">Register Allocation Table (RAT)</h2>
+<p>Table that says which physical register has value for which architectural register. This is updated and used by the CPU as instructions are executed. As the CPU executes instructions the RAT is consulted to see where in physical memory the <em>current</em> value needed can be found. Then, when the instruction goes to write a value the RAT is updated with a new physical address that the register value can be found at.</p>
+<p>Example:</p>
+<p>When the instructions are compiled they refer to the architectural register.</p>
+<pre><code>ADD R1,R2,R3
+SUB R4,R1,R5
+XOR R6,R7,R8
+MUL R5,R8,R9
+ADD R4,R8,R9
+</code></pre><p>When the instructions are executed they use the RAT to pull the location for their arguments and then choose an unused physical register to store the result. Then the RAT is updated with the location of that result.</p>
+<pre><code>ADD P10,P2,P3
+SUB P11,P10,P5
+XOR P12,P7,P8
+MUL P13,P8,P9
+ADD P14,P8,P9
+</code></pre><table>
+<thead>
+<tr>
+<th></th>
+<th>RAT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>P10</td>
+</tr>
+<tr>
+<td>2</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>P14</td>
+</tr>
+<tr>
+<td>5</td>
+<td>P13</td>
+</tr>
+<tr>
+<td>6</td>
+<td>P12</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ilp-with-control-dependencies-aka-branches">ILP with Control Dependencies (aka branches)</h2>
+<p>In our perfect processor we also assume to have a perfect branch predictor. So we know which way the branch will go every time.</p>
+<p>Branch instructions themselves may be truely dependent (they need the results of some register therefore can only execute later) but the instructions within a branch are not necessarily dependent, and can have no impact on ILP.</p>
+<h2 id="ilp-vs-ipc">ILP vs IPC</h2>
+<p>IPC is bound by real-world constraints and is very much hardware architecture dependent. ILP is theoretical and is meant to find the &ldquo;perfect running conditions&rdquo; for the program itself, regardless of the hardware. For good IPC we want a wide-issue (many executions at once) out-of-order processor allows for close-to-ILP level productivitiy. <code>ILP &gt;= IPC</code></p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

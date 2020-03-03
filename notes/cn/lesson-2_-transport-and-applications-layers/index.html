@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    Lesson 2: Transport and Applications Layers - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="Lesson 2: Transport and Applications Layers"/>
+<meta name="twitter:description" content="Introduction Transport layer and TCP (Transmission Control Protocol) The goal is to learn algorithms that provide reliability, flow control, and congestion control. Also, more recent versions of TCP that are designed for better performance/diverse requirements (Such as predictible latency or sustained throughput).
+Readings CUBIC: A New TCP-Friendly High-Speed TCP Variant BIC-TCP is a method to maximize bandwith usage between two users given up-to-date knowledge of current network traffic/congestion to minimize packet loss."/>
+
+<meta property="og:title" content="Lesson 2: Transport and Applications Layers" />
+<meta property="og:description" content="Introduction Transport layer and TCP (Transmission Control Protocol) The goal is to learn algorithms that provide reliability, flow control, and congestion control. Also, more recent versions of TCP that are designed for better performance/diverse requirements (Such as predictible latency or sustained throughput).
+Readings CUBIC: A New TCP-Friendly High-Speed TCP Variant BIC-TCP is a method to maximize bandwith usage between two users given up-to-date knowledge of current network traffic/congestion to minimize packet loss." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/cn/lesson-2_-transport-and-applications-layers/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:53:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:53:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        Lesson 2: Transport and Applications Layers
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>Lesson 2: Transport and Applications Layers</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="introduction">Introduction</h1>
+<h2 id="transport-layer-and-tcp-transmission-control-protocol">Transport layer and TCP (Transmission Control Protocol)</h2>
+<p>The goal is to learn algorithms that provide reliability, flow control, and congestion control. Also, more recent versions of TCP that are designed for better performance/diverse requirements (Such as predictible latency or sustained throughput).</p>
+<h2 id="readings">Readings</h2>
+<h3 id="cubic-a-new-tcp-friendly-high-speed-tcp-variant">CUBIC: A New TCP-Friendly High-Speed TCP Variant</h3>
+<p>BIC-TCP is a method to maximize bandwith usage between two users given up-to-date knowledge of current network traffic/congestion to minimize packet loss. This is done using a binary search algorithm to grow the &ldquo;window&rdquo; (number of successive packets sent in bursts) to the midway point between current sending and maximum sending with minimum packet loss. This is repeated on each TCP send to quickly increase data flow and check for changing congestion.</p>
+<p>CUBIC is the next form of BIC-TCP</p>
+<h2 id="multiplexing">Multiplexing</h2>
+<p>TCP translates application requests into network messages by assigning a socket to the requests to be sent from. It also takes incomming network messages and reads which socket they&rsquo;re destined for and delivers them to the appropriate application. This allows for multiple apps to make simultaneous network sends instead of having to wait for other applications to send <em>and recieve</em> their messages. Ex: spotify and facebook at the same time, packets must be delivered to the correct server and returned to the correct app.</p>
+<p><strong>Multiplexing:</strong> adding socket information to data chunks (thus becoming segments) and forward to the network layer</p>
+<p><strong>Demultiplexing:</strong> delivering segments to the approprate socket</p>
+<p><strong>Connectionless multiplexing/demultiplexing:</strong> UDP socket identifiers are a destination IP address and a destination port number. Recieving host doesn&rsquo;t care where the mesage comes from as long as the destination port number is one that it has a socket for and can demultiplex to.</p>
+<p><strong>Connection oriented multiplexing/demultiplexing:</strong> TCP sock identifiers are both the source and destination IP address and port. Recieving host has a listening socket that takes in all requests coming from TCP clients. Once it recieves a connection request it <em>creates a socket</em> using the sent identifiers and demultiplexes incoming data. This establishes a TCP connection and both hosts can send and recieve data between one another.</p>
+<p>Persistent HTTP uses the same connection for multiple messages, non-persistent HTTP creates a new TCP connection for every request and response. This can have negative performance inpacts on</p>
+<h2 id="why-not-use-process-ids">Why not use process IDs?</h2>
+<p>Process IDs are OS specific which would make the protocol OS dependent. Also, a single process can set up multiple channels of communication, so using process IDs would prevent demultiplexing. Using process IDs would prevent the use of a listening port (which increases security?)</p>
+<h2 id="udp">UDP</h2>
+<p>UDP is unreliable and doesn&rsquo;t require the establishment of a connection befort sending packets. So why use UDP?</p>
+<p>It doesn&rsquo;t require extra work from the transport layer (no congestion control, no retransmission if ACK isn&rsquo;t recieved) therefor it <em>can</em> be faster. It also doesn&rsquo;t require the maintenence of a connection (eg with buffers). Both of these reasons mean less delays.</p>
+<p>Delay sensitive applications that don&rsquo;t care about some potential losses are better suited to using UDP.</p>
+<table>
+<thead>
+<tr>
+<th>Application</th>
+<th>Application-Layer Protocol</th>
+<th>Underlying Transport Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Remote file server</td>
+<td>NFS</td>
+<td>Typically UDP</td>
+</tr>
+<tr>
+<td>Network management</td>
+<td>SNMP</td>
+<td>Typically UDP</td>
+</tr>
+<tr>
+<td>Routing protocol</td>
+<td>RIP</td>
+<td>Typically UDP</td>
+</tr>
+<tr>
+<td>Name translation</td>
+<td>DNS</td>
+<td>Typically UDP</td>
+</tr>
+<tr>
+<td>Streaming multimedia</td>
+<td>proprietary</td>
+<td>UDP or TCP</td>
+</tr>
+<tr>
+<td>Internet telephony</td>
+<td>proprietary</td>
+<td>UDP or TCP</td>
+</tr>
+<tr>
+<td>email</td>
+<td>SMTP</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>Remote terminal access</td>
+<td>Telnet</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>HTTP</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>File tansfer</td>
+<td>FTP</td>
+<td>TCP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="udp-packet-structure">UDP packet structure</h3>
+<p>UDP has a <strong>64 bit header</strong></p>
+<ol>
+<li>Source and destination ports</li>
+<li>Length of the UDP segment (header and data)</li>
+<li>Checksum (an error checking mechanism). The sender adds the src port, dest port and packet length. If there&rsquo;s an overflow it wraps around. Then performs a 1s compliment (1 -&gt; 0, 0 -&gt; 1). The reciever adds all four 16-bit fields (source port, dest port, packet length, and checksum) and checks if all values are 1. If not there was an error. This will always detect 1-bit errors, but if a 2-bit error is on the &ldquo;edge&rdquo; of a number it could go unnoticed.</li>
+</ol>
+<h2 id="tcp-three-way-handshake">TCP Three-Way Handshake</h2>
+<h3 id="connection-setup">Connection setup</h3>
+<ol>
+<li>The TCP client sends a segement with no data with SYN bit set to 1. It also generates an initial sequence number (client_isn) and includes it in this initial segment.</li>
+<li>Server allocates a buffer and other resources for the connection and responds with SYNACK segment also with SYN bit set to 1. Also includes <code>ack = client_isn+1</code> and a randomly chosen initial squence number <code>server_seq</code></li>
+<li>Once the client receives the SYNACK segment it also allocates resources for the connection and sends an acknoledgment with SYN set to 0</li>
+</ol>
+<h3 id="connection-teardown">Connection teardown</h3>
+<ol>
+<li>When client wants to end: sends segment with FIN bit set to 1.</li>
+<li>Server acknowledges and begins closing/shutting down resources.</li>
+<li>Server sends segment with FIN set to 1, indicating connection is closed.</li>
+<li>Client sends ack then waits for a time then closes.</li>
+</ol>
+<hr>
+<h2 id="reliable-transmission">Reliable Transmission</h2>
+<p>TCP devs implimented reliable transmission as a primitive in the transport layer. <strong>TCP guarantees an in-order delivery of the application-layer data without any loss or corruption.</strong></p>
+<p>How is this achieved? One way is for the receiver to send acknowledgements (ACKs) for each packet received. If the sender doesn&rsquo;t receive an ACK for a packet it sent within a certain amount of time (timeout) it considers the packet lost and resends it. This is known as <strong>Automatic Repeat Request or ARQ</strong></p>
+<p><strong>Stop and Wait ARQ</strong> is when the sender waits for the ACK for each packet sent before sending another packet. This is very bad.</p>
+<p><strong>Go-back-N</strong> is when the receiver drops all packets after a missed packet. When the sender timesout/notices the lack of ACKs it starts sending from the dropped packet onward. This is bad.</p>
+<p><strong>Selective ACK</strong>ing is what TCP uses. When there&rsquo;s a dropped packet, the reciever ACKs all further packets received with the dropped packet credentials, signifying it was dropped. When the sender times out on that packet <strong>or receives three repeated ACKs</strong> it resends the dropped packet. In the meantime the receiver buffers the other packets to be able to reassemble the full message.</p>
+<h2 id="transmission-control">Transmission Control</h2>
+<p><strong>Why control the transmission rate?</strong> Many perameters affect actual transmission rates of links vs max transmission rates (no other users, users computer has no way of knowing max rate, receiver is receiving from many other users, etc)</p>
+<p><strong>Where should the transmission control function reside in the network stack?</strong> UDP lets apps decide. However, most apps need access to these controls so it makes sense to put it in the transport layer. It also entails the methods of fairness in using the network. Thus, TCP provides these mechanisms. They are part of ongoing research to increase network efficiency.</p>
+<h2 id="flow-control">Flow Control</h2>
+<p>First case is to prevent receiver buffer overflow. If application is slower than rate of packets recieved, packets will be lost due to overflow. Rate control via a variable &lsquo;receive window&rsquo; (receive buffer - TCP data in buffer) helps sender match this rate moment-to-moment. The receiver sends the receive window (<code>rwnd</code>) in every ACK it responds with.</p>
+<p><code>rwnd = RcvBuffer - [LastByteRcvd - LastByteRead]</code>
+<code>LastByteSent - LastByteAcked &lt;= rwnd</code></p>
+<p>There can be issues if receiver sends <code>rwnd = 0</code> and sender stops sending. If the receiver has nothing more to send, then the sender will never know when the buffer opens back up. TCP resolves this by having the sender send packets with a size of 1 byte when rwnd is 0. That way ACKs eventually come back once the buffer is open.</p>
+<h2 id="congestion-control">Congestion Control</h2>
+<p>Flow control is also used to reduce congestion in a network. These mechanisms need to be <em>very</em> dynamic in order to adapt to users joining/leaving and the creation/destruction of connections.</p>
+<h3 id="goals-of-congestion-control">Goals of Congestion Control</h3>
+<ul>
+<li>Effiency: High total network throughput/utilization</li>
+<li>Fairness: Each user should have fair use of bandwidth</li>
+<li>Low delay: If throughput is maxed, further messages will have delay. Some apps (video conferencing) suffer greatly from delays.</li>
+<li>Fast convergence: See CUBIC paper. Each flow should get to its fair allocation asap.</li>
+</ul>
+<h3 id="e2e-vs-network-assisted">E2E vs Network-assisted</h3>
+<p>For network-assisted congestion control, routers could update users by sending their own packets. If those packets were lost or the network was already very congested, this would prove inefficient.</p>
+<p>TCP uses end-to-end congestion control. Hosts infer congestion from network behavior.</p>
+<p>Certain routers in modern networks do provide explicit feedback to end-host by using ECN and QCN protocols.</p>
+<h3 id="signs-of-congestion">Signs of congestion</h3>
+<p>Packet delay due to queues in router buffers. <em>Increases</em> in round trip time (inferred via ACKs) can be an indicator. However, packet delay is variable, making this tricky</p>
+<p>Packet loss due to routers during high congestion. There are other reasons for packet loss, but those are far more rare. Early TCP used packet loss because it was already being tracked for reliability.</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

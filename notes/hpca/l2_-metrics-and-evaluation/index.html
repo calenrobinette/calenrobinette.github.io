@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L2: Metrics and Evaluation - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L2: Metrics and Evaluation"/>
+<meta name="twitter:description" content="Metrics and Evaluation Performance Latency is how long from start -&gt; finish. Throughput is # of processes/second.
+Comparing throughput is done via speedup = N:
+N = throughput(x)/throughput(y)
+whereas latency is:
+N = latency(y)/latency(x)
+In both instances we get &ldquo;x is N times faster than y&rdquo;
+While performance is directly proportional to throughput, it is proportional to 1/latency
+ Measuring Performance Performance = 1/execution time
+However, execution time depends on user load"/>
+
+<meta property="og:title" content="L2: Metrics and Evaluation" />
+<meta property="og:description" content="Metrics and Evaluation Performance Latency is how long from start -&gt; finish. Throughput is # of processes/second.
+Comparing throughput is done via speedup = N:
+N = throughput(x)/throughput(y)
+whereas latency is:
+N = latency(y)/latency(x)
+In both instances we get &ldquo;x is N times faster than y&rdquo;
+While performance is directly proportional to throughput, it is proportional to 1/latency
+ Measuring Performance Performance = 1/execution time
+However, execution time depends on user load" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l2_-metrics-and-evaluation/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:01:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:01:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L2: Metrics and Evaluation
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L2: Metrics and Evaluation</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="metrics-and-evaluation">Metrics and Evaluation</h1>
+<h2 id="performance">Performance</h2>
+<p>Latency is how long from start -&gt; finish. Throughput is # of processes/second.</p>
+<p>Comparing throughput is done via speedup = N:</p>
+<p><code>N = throughput(x)/throughput(y)</code></p>
+<p>whereas latency is:</p>
+<p><code>N = latency(y)/latency(x)</code></p>
+<p>In both instances we get &ldquo;x is N times faster than y&rdquo;</p>
+<p>While performance is directly proportional to throughput, it is proportional to <code>1/latency</code></p>
+<hr>
+<h2 id="measuring-performance">Measuring Performance</h2>
+<p><code>Performance = 1/execution time</code></p>
+<p>However, execution time depends on user load</p>
+<ul>
+<li>this depends on user</li>
+<li>requires many programs that could be run</li>
+<li>user would have to willingly give performance data</li>
+</ul>
+<p><strong>Benchmarks</strong> are programs and user data agreed upon for performance measurement. Usually part of a benchmark suite to simlate different types of apps running on the hardware.</p>
+<ul>
+<li>Real applications
+<ul>
+<li>most representitave of realworld use</li>
+<li>difficult to set up on new machine (because incomplete)</li>
+<li>for actual machines</li>
+</ul>
+</li>
+<li>Kernels
+<ul>
+<li>find most time consuming part of app</li>
+<li>still can be too difficult on new machine (might not have compiler)</li>
+<li>for prototypes</li>
+</ul>
+</li>
+<li>Synthetic Benchmarks
+<ul>
+<li>behave like kernals but purposefully easier to compile</li>
+<li>good for design studies</li>
+</ul>
+</li>
+<li>Peak Performance
+<ul>
+<li>theoretical maximums (this is for marketing)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Benchmark Standards</strong> are set by independent organizations (made up of user groups, academics and manufacturers)</p>
+<ul>
+<li>TPC (DB, webservers, transaction processing)</li>
+<li>EEMBC (embedding processing)</li>
+<li>SPEC (raw processesors)
+<ul>
+<li>GCC (software dev workloads)</li>
+<li>BWAVES, LBM (fluid dynamics)</li>
+<li>PERL (string processing)</li>
+<li>CACTUS ADM (physics/relativity)</li>
+<li>XALANC BMK (XML)</li>
+<li>CALCULIX, DEALL (diff eq)</li>
+<li>BZIP (compression)</li>
+<li>GO, SJENG (gaming)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Summarizing performance</strong> is done by averaging performance accross different applications. Not average speedup! Geometric means can be used on values and speed up.</p>
+<hr>
+<h2 id="iron-law-of-performance">Iron Law of Performance</h2>
+<p><code>CPU TIME = # instructions in program * cycles per instruction * clock cycle time</code></p>
+<p>We use these three metrics to calculate CPU time because it allows us to analyze different, important areas that each affect performance. Number of instructions in program is affected by the algorithm choice as well the compiler choice. Instruction set is also a factor. If the instructions are too simple it will take more of them to execute the same thing. Instruction set also affects the cycles, where simpler is a good thing that leads to fewer cycles. Processor design is the other factor for cycles. It also affects clock cycle time. Circuit design and transistor physics are the two other factors limiting clock cycle time.</p>
+<p>Computer Architecture is affected by instruction sets and processor design.</p>
+<p><strong>Unequal instruction times:</strong></p>
+<p>Changes <code># instructions in program * cycles per instruction</code> to be the sum of all the different types of instructions to get the total number of cycles.</p>
+<p><code>CPU TIME = SIGMA_i (IC_i * CPI_i) * TIME/CYCLE</code></p>
+<hr>
+<h2 id="amdahls-law">Amdahl&rsquo;s Law</h2>
+<p>Used for speedup of part of the program or only some of the instructions and we want to know what the overall speedup is.</p>
+<p><code>SPEEDUP = 1 / ((1 - Frac_Enh) + (Frac_Enh/speedupAmnt))</code></p>
+<p>Where <code>Frac_Enh = % of original execution **TIME**</code></p>
+<p>Better to get small improvements on large portions of time rather than large improvements on small portions. e.g. <strong>make common case fast</strong></p>
+<hr>
+<h2 id="lhadmas-law">Lhadma&rsquo;s Law</h2>
+<p>Don&rsquo;t mess up uncommon case too badly while making improvements on common case.</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

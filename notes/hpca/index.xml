@@ -1,35 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Food, Coffee, Code</title>
-    <link>https://robinette.dev/</link>
-    <description>Recent content on Food, Coffee, Code</description>
+    <title>High-Performance Computer Architecture on Food, Coffee, Code</title>
+    <link>https://robinette.dev/notes/hpca/</link>
+    <description>Recent content in High-Performance Computer Architecture on Food, Coffee, Code</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 02 Mar 2020 18:49:41 -0500</lastBuildDate>
+    <lastBuildDate>Mon, 02 Mar 2020 20:53:47 -0500</lastBuildDate>
     
-	<atom:link href="https://robinette.dev/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://robinette.dev/notes/hpca/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Lesson 2: Transport and Applications Layers</title>
-      <link>https://robinette.dev/notes/cn/lesson-2_-transport-and-applications-layers/</link>
-      <pubDate>Mon, 02 Mar 2020 20:53:47 -0500</pubDate>
-      
-      <guid>https://robinette.dev/notes/cn/lesson-2_-transport-and-applications-layers/</guid>
-      <description>Introduction Transport layer and TCP (Transmission Control Protocol) The goal is to learn algorithms that provide reliability, flow control, and congestion control. Also, more recent versions of TCP that are designed for better performance/diverse requirements (Such as predictible latency or sustained throughput).
-Readings CUBIC: A New TCP-Friendly High-Speed TCP Variant BIC-TCP is a method to maximize bandwith usage between two users given up-to-date knowledge of current network traffic/congestion to minimize packet loss.</description>
-    </item>
-    
-    <item>
-      <title>Lesson 1: Introduction, Internet History and Architecture</title>
-      <link>https://robinette.dev/notes/cn/lesson-1_-introduction-internet-history-and-architecture/</link>
-      <pubDate>Mon, 02 Mar 2020 20:50:47 -0500</pubDate>
-      
-      <guid>https://robinette.dev/notes/cn/lesson-1_-introduction-internet-history-and-architecture/</guid>
-      <description>Introduction Why Study Computer Networks? The Internet has grown in leaps and bounds in the past 2 years and it is expected that it will only continue to do so. Continued advancements in network designs will lead to greater societal advancements. Advancing internet research involves facinating multi-disciplinary problems. This, in turn, would lead to high-impact research opportunities.
- Internet Architecture Network Protocols provide structure to the network architecture by organizing the protocols into layers.</description>
-    </item>
     
     <item>
       <title>L11: VLIW</title>
@@ -155,16 +135,6 @@ However, execution time depends on user load</description>
       <guid>https://robinette.dev/notes/hpca/l1_-introduction-metrics-and-evaluation/</guid>
       <description>Introduction, Metrics, and Evaluation What is Computer Architecture Design a computer that is well designed for it&amp;rsquo;s purpose (e.g. the difference between a laptop, desktop, smartphone, server, etc). Laptop and smartphone would be focused on battery life, desktop on power, etc. We need computer architecture to improve performace (speed, battery life, size, weight) and abilities (3D graphics, security, debugging support).
 Computer Architecture is the translation of hardware improvements into better performing and more capable software.</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>https://robinette.dev/about/</link>
-      <pubDate>Mon, 02 Mar 2020 18:49:41 -0500</pubDate>
-      
-      <guid>https://robinette.dev/about/</guid>
-      <description>Hello, my name is Calen Robinette and I am currently a graduate student studying computer science in Georgia Tech&amp;rsquo;s OMSCS program. Prior to this, I attended Portland State University studying mathematics with a focus on Topology. You can contact me via email and can find my updated resume here.
-Besides computers and math, I&amp;rsquo;ve spent a good portion of my life dedicated to studying coffee and food. I have competed as a barista, helped organize coffee community events, and generally enjoy learning and talking about coffee.</description>
     </item>
     
   </channel>

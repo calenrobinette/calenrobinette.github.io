@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L11: VLIW - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L11: VLIW"/>
+<meta name="twitter:description" content="Very Long Instruction Word Superscalar vs VLIW     OOO Superscalar In-Order Superscalar VLIW     IPC &lt;=N &lt;=N 1 Large Inst some work as N &ldquo;normal&rdquo; insts   How do we find indep. inst. Look at &gt;N insts Look at next N insts in program order Just do next large inst   Hardware cost Expensive Less Expensive Even Less Expensive   Help from compiler Compiler can help Needs help Completely depends on compiler    VLIW: The Good and the Bad Good:"/>
+
+<meta property="og:title" content="L11: VLIW" />
+<meta property="og:description" content="Very Long Instruction Word Superscalar vs VLIW     OOO Superscalar In-Order Superscalar VLIW     IPC &lt;=N &lt;=N 1 Large Inst some work as N &ldquo;normal&rdquo; insts   How do we find indep. inst. Look at &gt;N insts Look at next N insts in program order Just do next large inst   Hardware cost Expensive Less Expensive Even Less Expensive   Help from compiler Compiler can help Needs help Completely depends on compiler    VLIW: The Good and the Bad Good:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l11_-vliw/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:10:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:10:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L11: VLIW
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L11: VLIW</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="very-long-instruction-word">Very Long Instruction Word</h1>
+<h2 id="superscalar-vs-vliw">Superscalar vs VLIW</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>OOO Superscalar</th>
+<th>In-Order Superscalar</th>
+<th>VLIW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IPC</td>
+<td>&lt;=N</td>
+<td>&lt;=N</td>
+<td>1 Large Inst some work as N &ldquo;normal&rdquo; insts</td>
+</tr>
+<tr>
+<td>How do we find indep. inst.</td>
+<td>Look at &gt;N insts</td>
+<td>Look at next N insts in program order</td>
+<td>Just do next large inst</td>
+</tr>
+<tr>
+<td>Hardware cost</td>
+<td>Expensive</td>
+<td>Less Expensive</td>
+<td>Even Less Expensive</td>
+</tr>
+<tr>
+<td>Help from compiler</td>
+<td>Compiler <em>can</em> help</td>
+<td>Needs help</td>
+<td>Completely depends on compiler</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vliw-the-good-and-the-bad">VLIW: The Good and the Bad</h2>
+<p>Good:</p>
+<ul>
+<li>Compiler does the hard work</li>
+<li>Simpler Hardware</li>
+<li>Can be energy efficient</li>
+<li>Works well on loops and &ldquo;regular&rdquo; code</li>
+</ul>
+<p>Bad:</p>
+<ul>
+<li>Latencies are not always the same</li>
+<li>Irregular Applications</li>
+<li>Code Bloat
+<ul>
+<li>In the case of dependent instructions in OoO processors, VLIW has to issue no ops which is wasted space per instruction</li>
+<li>Can lead to 4x program size</li>
+</ul>
+</li>
+</ul>
+<h2 id="vliw-instructions">VLIW Instructions</h2>
+<ul>
+<li>Has all the &ldquo;normal&rdquo; ISA opcodes</li>
+<li>Full predication support</li>
+<li>Lots of registers</li>
+<li>Branch hints from compiler to aid in BPred</li>
+<li>VLIW instruction &ldquo;compaction&rdquo;
+<ul>
+<li>Adding stops between instructions</li>
+</ul>
+</li>
+</ul>
+<h2 id="vliw-examples">VLIW Examples</h2>
+<ul>
+<li>Intel Itanium
+<ul>
+<li>Tons of ISA features</li>
+<li>HW very complicated</li>
+<li>Still not great on irregular code</li>
+</ul>
+</li>
+<li>DPS Processors
+<ul>
+<li>Regular loops, lots of iterations</li>
+<li>Excellent performance</li>
+<li>Very Energy-Efficient</li>
+</ul>
+</li>
+</ul>
+<p>Note: good for adding -&gt; Counting -&gt; figuring out stuff</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

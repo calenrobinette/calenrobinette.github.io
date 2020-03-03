@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Thoughts, Code and Notes by Calen Robinette">
+<title>
+    L5: Predication - Food, Coffee, Code
+</title>
+
+
+
+<link rel="shortcut icon" href="/favicon.png">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.4321edce0de245f4b1d32680d89ac669940fe5dec17e1791c721d9a0954987b4.css" integrity="sha256-QyHtzg3iRfSx0yaA2JrGaZQP5d7BfheRxyHZoJVJh7Q=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Didact+Gothic">
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://robinette.dev/tn.png"/>
+
+<meta name="twitter:title" content="L5: Predication"/>
+<meta name="twitter:description" content="Predication Using the compiler to avoid hard to predict branches. Branch prediction guesses where the branches are going with no penalty if they are correct. A missed prediction throws away many cycles of work.
+Predication is where both sets of instructions are loaded (taken/not taken) and only one is thrown out ensuring waste is only 50% of total work. The advantage of predication is very niche, since if a BPred is fairly accurate it accrues very little penalty on average whereas predication always has a penalty."/>
+
+<meta property="og:title" content="L5: Predication" />
+<meta property="og:description" content="Predication Using the compiler to avoid hard to predict branches. Branch prediction guesses where the branches are going with no penalty if they are correct. A missed prediction throws away many cycles of work.
+Predication is where both sets of instructions are loaded (taken/not taken) and only one is thrown out ensuring waste is only 50% of total work. The advantage of predication is very niche, since if a BPred is fairly accurate it accrues very little penalty on average whereas predication always has a penalty." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://robinette.dev/notes/hpca/l5_-predication/" />
+<meta property="og:image" content="https://robinette.dev/tn.png"/>
+<meta property="article:published_time" content="2020-03-02T20:04:47-05:00" />
+<meta property="article:modified_time" content="2020-03-02T20:04:47-05:00" /><meta property="og:site_name" content="Calen Robinette&#39;s blog" />
+
+
+    
+
+    
+    
+    
+    <title>
+        
+        L5: Predication
+        
+    </title>
+</head>
+
+<body>
+    
+    
+    <header class="wrap flex-container">
+        <h1>L5: Predication</h1>
+    </header>
+    
+    <main class="wrap">
+        
+        <article role="article" class="flex-container"><h1 id="predication">Predication</h1>
+<p>Using the compiler to avoid hard to predict branches. Branch prediction guesses where the branches are going with no penalty if they are correct. A missed prediction throws away many cycles of work.</p>
+<p><strong>Predication</strong> is where both sets of instructions are loaded (taken/not taken) and only one is thrown out ensuring waste is only 50% of total work. The advantage of predication is very niche, since if a BPred is fairly accurate it accrues very little penalty on average whereas predication <em>always has a penalty</em>.</p>
+<ul>
+<li>Loops should always be done via BPred since they are easy to predict</li>
+<li>Funcation call/returns don&rsquo;t have multiple directions of work to do so predication makes no sense.</li>
+<li>Large if-then-else will guarantee to waste however long one side of the branch making it just as bad, if not worse, than BPred <em>if there&rsquo;s a missprediction</em>.</li>
+<li>However, Predication is useful for small if-then-else because the branching paths of instructions could be smaller than throwing out the entire pipeline in the case of a missprediction.</li>
+</ul>
+<p>So predication should be used for id-then-else statements with less instructions than what&rsquo;s thrown out in a missprediction multiplied by the chance of misspredicting. This is because predication&rsquo;s cost is guaranteed and must be compared to the average cost of missprediction.</p>
+<h2 id="if-conversion">If-Conversion</h2>
+<p>How the compiler creates the code to be executed on both paths.</p>
+<pre><code>if (cond) {
+    x = arr[i];
+    y = y + 1;
+} else {
+    x = arr[j];
+    y = y - 1;
+}
+</code></pre><p>This translates into:</p>
+<pre><code>x1 = arr[i];
+x2 = arr[j];
+y1 = y + 1;
+y2 = y - 1;
+x = cond ? x1 : x2;
+y = cond ? y1 : y2;
+</code></pre><p>But to ensure that we&rsquo;re not just substituting the same problem by translating x = cond&hellip; and y = cond&hellip; into two branches, we have to come up with a <code>MOV</code> instruction that only operates if a condition bit is set. This is known as <strong>Conditional Move</strong>.</p>
+<p>For MIPS: <code>MOVZ R_d, R_s, R_t</code> -&gt; <code>if(R_t == 0) { R_d = R_s }</code> and <code>MOVN</code> is the for the opposing condition <code>R_t != 0</code>. So, by using both we can get the <code>x = cond ? x1: x2;</code> we&rsquo;re looking for.
+x86: <code>CMOVZ</code>, <code>CMOVNZ</code>, <code>CMOVGT</code>, etc. This allows for the removal of the <code>R3 = cond;</code> statement below because the condition is checked by the asm instruction.</p>
+<pre><code>R3 = cond;
+R1 = x1;
+R2 = x2;
+MOVN x, R1, R3
+MOVZ x, R2, R3
+</code></pre><p><strong>quiz note:</strong> <code>BEQZ R1, Else</code> - if R1 is zero jump to <code>Else:</code>, otherwise proceed to the next instruction</p>
+<h2 id="movzmovn-performance">MOVZ/MOVN Performance</h2>
+<p>For BPred: <code>Cost = (#inst_path_A + #inst_path_B) / 2 + %MisPred * MisPredCost</code>
+For If-Conversion: <code>Cost = #inst</code></p>
+<p><strong>quiz note:</strong> <code>accuracy = 100 - MisPred</code></p>
+<h2 id="movc-summary-conditional-movs">MOVc summary (Conditional MOVs)</h2>
+<p>It&rsquo;s important to note, this approach needs <em>compiler support</em>. The advantage is that hard-to-predict branches are removed and replaced with instructions that are guaranteed to execute. This does add cost in the form of additional registers needed and more instrctions executed for both paths.</p>
+<p>However, to increase performance we can make all instructions conditional so that the register is not always written to and we no longer need MOV to select the results. Instead the results are only calculated/written if the condition is met. This is known as <strong>Full Predication</strong></p>
+<h2 id="full-predication-hardware-support">Full Predication Hardware Support</h2>
+<p>Same instructions as the If-Conversion, just add a condition bit (qualifying predicate) to every instruction. This leads to the removal of the MOV instructions</p>
+<pre><code>Mp.EQZ    P1,P2,R1
+(p2) ADD1 R2,R2,1
+(p1) ADD1 R3,R3,1
+</code></pre><p><code>Mp.EQZ</code> checks if R1 is zero and sets p1 to true and p2 to false if R1 is zero. The opposite if R1 is 1.</p>
+<p><strong>quiz note:</strong> calculate total cycle cost for branch inst vs if-conversion then compare the difference. This is the &ldquo;allowable&rdquo; penalty. The allowable/actual penalty for misspred gives mispred% -&gt; accuracy = 100 - mispred%</p>
+</article>
+        
+
+        
+        
+        <nav role="navigation" class="flex-container bottom-menu">
+            
+<hr />
+<p>
+
+
+    
+
+    
+        
+            <a href="/posts">blog</a>
+        
+    
+    
+        
+            &#183; 
+            <a href="https://github.com/calenrobinette">code</a>
+        
+            &#183; 
+            <a href="/notes">notes</a>
+        
+            &#183; 
+            <a href="/about">about</a>
+        
+    
+    &#183; 
+    <a href="/">
+        main
+    </a>
+
+</p>
+        </nav>
+        
+        
+    </main>
+    
+    <footer class="flex-container footer">Hello my name is Calen.</footer>
+    
+    
+</body>
+
+</html>

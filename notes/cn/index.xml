@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Computer Networks on Food, Coffee, Code</title>
+    <link>https://robinette.dev/notes/cn/</link>
+    <description>Recent content in Computer Networks on Food, Coffee, Code</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 02 Mar 2020 20:53:07 -0500</lastBuildDate>
+    
+	<atom:link href="https://robinette.dev/notes/cn/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Lesson 2: Transport and Applications Layers</title>
+      <link>https://robinette.dev/notes/cn/lesson-2_-transport-and-applications-layers/</link>
+      <pubDate>Mon, 02 Mar 2020 20:53:47 -0500</pubDate>
+      
+      <guid>https://robinette.dev/notes/cn/lesson-2_-transport-and-applications-layers/</guid>
+      <description>Introduction Transport layer and TCP (Transmission Control Protocol) The goal is to learn algorithms that provide reliability, flow control, and congestion control. Also, more recent versions of TCP that are designed for better performance/diverse requirements (Such as predictible latency or sustained throughput).
+Readings CUBIC: A New TCP-Friendly High-Speed TCP Variant BIC-TCP is a method to maximize bandwith usage between two users given up-to-date knowledge of current network traffic/congestion to minimize packet loss.</description>
+    </item>
+    
+    <item>
+      <title>Lesson 1: Introduction, Internet History and Architecture</title>
+      <link>https://robinette.dev/notes/cn/lesson-1_-introduction-internet-history-and-architecture/</link>
+      <pubDate>Mon, 02 Mar 2020 20:50:47 -0500</pubDate>
+      
+      <guid>https://robinette.dev/notes/cn/lesson-1_-introduction-internet-history-and-architecture/</guid>
+      <description>Introduction Why Study Computer Networks? The Internet has grown in leaps and bounds in the past 2 years and it is expected that it will only continue to do so. Continued advancements in network designs will lead to greater societal advancements. Advancing internet research involves facinating multi-disciplinary problems. This, in turn, would lead to high-impact research opportunities.
+ Internet Architecture Network Protocols provide structure to the network architecture by organizing the protocols into layers.</description>
+    </item>
+    
+  </channel>
+</rss>
